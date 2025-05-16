@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Support Companion Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            min-height: 100px;
+        }
+        .loading {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+        .error {
+            color: #d32f2f;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Support Companion Tester</h1>
+    
+    <div class="container">
+        <h2>Send a Message</h2>
+        <textarea id="userInput" placeholder="Type your message here..."></textarea>
+        <button id="sendButton">Send Message</button>
+        
+        <div class="loading" id="loading">
+            <p>Getting response...</p>
+        </div>
+        
+        <div id="error" class="error"></div>
+        
+        <h2>AI Response</h2>
+        <div id="response">Response will appear here</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userInput = document.getElementById('userInput');
+            const sendButton = document.getElementById('sendButton');
+            const responseDiv = document.getElementById('response');
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            
+            // API endpoint URL - change this to your deployed API URL
+            const apiUrl = 'https://ai-backend-steel.vercel.app/api/hello';
+            
+            sendButton.addEventListener('click', async function() {
+                const message = userInput.value.trim();
+                
+                if (!message) {
+                    errorDiv.textContent = 'Please enter a message';
+                    return;
+                }
+                
+                errorDiv.textContent = '';
+                loadingDiv.style.display = 'block';
+                responseDiv.textContent = 'Waiting for response...';
+                
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ userInput: message })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    responseDiv.textContent = data.response || 'No response received';
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    errorDiv.textContent = `Error: ${error.message}`;
+                    responseDiv.textContent = 'Failed to get response';
+                } finally {
+                    loadingDiv.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
